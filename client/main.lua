@@ -41,7 +41,17 @@ local function getClosestSchool()
     return closest
 end
 
+local function getJobs()
+    QBCore.Functions.TriggerCallback('qb-cityhall:server:receiveJobs', function(result)
+        SendNUIMessage({
+            action = 'setJobs',
+            jobs = result
+        })
+    end)
+end
+
 local function setCityhallPageState(bool, message)
+    getJobs()
     if message then
         local action = bool and "open" or "close"
         SendNUIMessage({
@@ -198,8 +208,8 @@ local function deletePeds()
     pedsSpawned = false
 end
 
--- Events
 
+-- Events
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerData = QBCore.Functions.GetPlayerData()
     isLoggedIn = true
@@ -214,6 +224,10 @@ end)
 
 RegisterNetEvent('QBCore:Player:SetPlayerData', function(val)
     PlayerData = val
+end)
+
+RegisterNetEvent('qb-cityhall:Client:AddCityJob', function()
+    getJobs()
 end)
 
 RegisterNetEvent('qb-cityhall:client:getIds', function()
@@ -297,12 +311,6 @@ end)
 CreateThread(function()
     initBlips()
     spawnPeds()
-    QBCore.Functions.TriggerCallback('qb-cityhall:server:receiveJobs', function(result)
-        SendNUIMessage({
-            action = 'setJobs',
-            jobs = result
-        })
-    end)
     if not Config.UseTarget then
         while true do
             local sleep = 1000
